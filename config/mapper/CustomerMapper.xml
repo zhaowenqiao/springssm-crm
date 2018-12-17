@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.itheima.crm.mapper.CustomerMapper" >
+
+
+<sql id="select_where_case">
+	<where>
+			<if test="custName!=null and custName!=''">
+				and cust_name LIKE '%${custName}%'
+			</if>
+			<if test="custSource!=null and custSource!=''">
+				AND cust_source = #{custSource}   
+			</if>
+			<if test="custIndustry!=null and custIndustry!=''">
+				AND cust_industry = #{custIndustry}
+			</if>
+			<if test="custLevel!=null and custLevel!=''">
+				AND cust_level = #{custLevel}
+			</if>
+		</where>
+
+</sql>
+
+	<!-- public List<Customer> getCustomerList(QueryVo vo); -->
+	<select id="getCustomerList" parameterType="com.itheima.crm.pojo.QueryVo" resultType="com.itheima.crm.pojo.Customer">
+		SELECT
+			cust_id,
+			cust_name,
+			a.dict_item_name as cust_source,
+		  b.dict_item_name as cust_industry,
+			d.dict_item_name as cust_level,
+			cust_phone,
+			cust_mobile
+		FROM
+			customer c
+		LEFT JOIN base_dict a ON c.cust_source = a.dict_id
+		LEFT JOIN base_dict b ON c.cust_industry = b.dict_id
+		LEFT JOIN base_dict d ON c.cust_level = d.dict_id
+		<include refid="select_where_case"/>
+		
+		limit #{start},#{rows}
+	</select>
+	
+	<select id="selectCount" parameterType="com.itheima.crm.pojo.QueryVo" resultType="int">
+		SELECT
+			count(1)
+		FROM
+			customer c
+		LEFT JOIN base_dict a ON c.cust_source = a.dict_id
+		LEFT JOIN base_dict b ON c.cust_industry = b.dict_id
+		LEFT JOIN base_dict d ON c.cust_level = d.dict_id
+		<include refid="select_where_case"/>
+	</select>
+	<!-- public Customer getCustomerById(Integer id) -->
+	<select id="getCustomerById" parameterType="int" resultType="com.itheima.crm.pojo.Customer">
+		select * from customer where cust_id=#{id}
+	</select>
+	<!-- public void updateCustomer(Customer customer) -->
+	<update id="updateCustomer" parameterType="com.itheima.crm.pojo.Customer">
+		update customer
+		<set>
+			<if test="cust_name!=null">
+				cust_name=#{cust_name},
+			</if>
+			<if test="cust_user_id!=null">
+				cust_user_id=#{cust_user_id},
+			</if>
+			<if test="cust_create_id!=null">
+				cust_create_id=#{cust_create_id},
+			</if>
+			<if test="cust_source!=null">
+				cust_source=#{cust_source},
+			</if>
+			<if test="cust_industry!=null">
+				cust_industry=#{cust_industry},
+			</if>
+			<if test="cust_level!=null">
+				cust_level=#{cust_level},
+			</if>
+			<if test="cust_linkman!=null">
+				cust_linkman=#{cust_linkman},
+			</if>
+			<if test="cust_phone!=null">
+				cust_phone=#{cust_phone},
+			</if>
+			<if test="cust_mobile!=null">
+				cust_mobile=#{cust_mobile},
+			</if>
+			<if test="cust_zipcode!=null">
+				cust_zipcode=#{cust_zipcode},
+			</if>
+			<if test="cust_address!=null">
+				cust_address=#{cust_address},
+			</if>
+			<if test="cust_createtime!=null">
+				cust_createtime=#{cust_createtime},
+			</if>
+		</set>
+		WHERE cust_id=#{cust_id}
+	</update>
+	
+	<!-- map 是mybatis默认的数据类型   sql语句中的#{}中的值一定要和外部传递的MAP中的key一致就可以了 -->
+	<select id="selectByMap" parameterType="map" resultType="com.itheima.crm.pojo.Customer">
+		select * from customer where cust_id=#{cust_id} and cust_name like '%${cust_name}%'
+	</select>
+	<!-- 传递一个LIST -->
+	
+	<select id="selectList" resultType="com.itheima.crm.pojo.Customer">
+		select * from customer where
+		<!-- 如果paramaterType 不写，传递的是List的话，这里的边的collection一定是list --> 
+		<foreach collection="list" open="cust_id in(" close=")" item="cust_id" separator=",">
+			#{cust_id}
+		</foreach>
+	</select>
+
+</mapper>
